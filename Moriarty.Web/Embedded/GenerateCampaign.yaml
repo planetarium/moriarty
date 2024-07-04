@@ -1,0 +1,27 @@
+name: GenerateCampaign
+template: |
+  Write a campaign setting for detective mystery game, in {{$language}}.
+  
+  * Background: {{$background}}
+  * Suspects: {{$suspects}} person
+
+template_format: semantic-kernel
+description: A function that generates a setting for mystery game.
+input_variables:
+  - name: language
+    description: The language for the generated setting.
+    is_required: true
+  - name: background
+    description: The background for the setting. (e.g., Morden City, Sword & Magic World)
+    is_required: false
+    default: "Morden City"
+  - name: suspects
+    description: Number of suspects in the settings.
+    is_required: false
+    default: 5
+output_variable:
+  description: The generated campaign setting.
+execution_settings:
+  service1:
+    model_id: gpt-4o
+    temperature: 0.7
