@@ -18,6 +18,7 @@ else if (campaigns.Any())
                 <th>Victim</th>
                 <th>Offender</th>
                 <th>Suspects</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -33,6 +34,9 @@ else if (campaigns.Any())
                         {
                             <span>@suspect.Name</span><br />
                         }
+                    </td>
+                    <td>
+                        <a href="/campaigns/@campaign.Id/edit">Edit</a>
                     </td>
                 </tr>
             }

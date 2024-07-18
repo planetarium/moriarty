@@ -1,0 +1,93 @@
+@page "/campaigns/{campaignId:guid}/edit"
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext AppDbContext
+@inject NavigationManager NavigationManager
+@inject ILogger<Campaigns_Edit> Logger
+
+@code {
+    [Parameter]
+    public Guid campaignId { get; set; }
+
+    private Campaign campaign;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            campaign = await AppDbContext.Campaigns
+                .Include(c => c.Victim)
+                .Include(c => c.Offender)
+                .Include(c => c.Suspects)
+                .FirstOrDefaultAsync(c => c.Id == campaignId);
+
+            if (campaign == null)
+            {
+                // Handle the case when the campaign is not found
+                NavigationManager.NavigateTo("/campaigns");
+            }
+        }
+        catch (Exception ex)
+        {
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+            AppDbContext.Campaigns.Update(campaign);
+            await AppDbContext.SaveChangesAsync();
+            NavigationManager.NavigateTo("/campaigns");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error saving campaign details.");
+            // Handle the error (e.g., show a message to the user)
+        }
+    }
+}
+
+<h3>Edit Campaign</h3>
+
+@if (campaign == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@campaign" OnValidSubmit="SaveChanges">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="title">Title</label>
+            <InputText id="title" class="form-control" @bind-Value="campaign.Title" />
+        </div>
+
+        <div class="form-group">
+            <label for="plot">Plot</label>
+            <InputText id="plot" class="form-control" @bind-Value="campaign.Plot" />
+        </div>
+        
+        <h3>Victim</h3>
+        <div class="row form-group">
+            <CharacterCard Character=@campaign.Victim Plot=@campaign.Plot />
+        </div>
+
+        <h3>Suspects</h3>
+        <div class="row form-group">
+        @foreach (var suspect in campaign.Suspects)
+        {
+            <CharacterCard Character=@suspect Plot=@campaign.Plot />
+        }
+        </div>
+
+        <div class="form-group">
+            <label for="offender">Offender</label>
+            <InputText id="offender" class="form-control" @bind-Value="campaign.Offender.Name" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary">Cancel</button>
+    </EditForm>
+}
