@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Moriarty.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,6 +18,7 @@ namespace Moriarty.Web.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
+                    Age = table.Column<int>(type: "INTEGER", nullable: false),
                     ProfilePicture = table.Column<byte[]>(type: "BLOB", nullable: false)
                 },
                 constraints: table =>
@@ -33,7 +34,9 @@ namespace Moriarty.Web.Migrations
                     Title = table.Column<string>(type: "TEXT", nullable: false),
                     Plot = table.Column<string>(type: "TEXT", nullable: true),
                     VictimId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    OffenderId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    OffenderId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Motive = table.Column<string>(type: "TEXT", nullable: true),
+                    Method = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

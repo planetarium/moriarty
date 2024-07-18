@@ -6,6 +6,7 @@ namespace Moriarty.Web.Data.Models;
 public class Campaign
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
     [Required]
@@ -24,6 +25,10 @@ public class Campaign
 
     [ForeignKey(nameof(OffenderId))]
     public Character Offender { get; set; }
+
+    public string Motive { get; set; }
+
+    public string Method { get; set; }
 
     public ICollection<Character> Suspects { get; set; } = [];
 }

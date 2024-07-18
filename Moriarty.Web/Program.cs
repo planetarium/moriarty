@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Moriarty.Web.Components;
 using Moriarty.Web.Data;
 using Moriarty.Web.Services;
@@ -15,12 +14,11 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContext<AppDbContext>(
-    options => options.UseSqlite("Data Source=campaign.db")
-);
+builder.Services.AddDbContext<AppDbContext>();
 
-builder.Services.AddSingleton<SementicKernelService>();
+builder.Services.AddSingleton<SemanticKernelService>();
 builder.Services.AddSingleton<PromptLoader>();
+builder.Services.AddScoped<HttpClient>();
 
 var app = builder.Build();
 

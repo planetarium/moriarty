@@ -1,0 +1,43 @@
+name: GeneratePotrait
+template: |
+  Generate prompt for Dall-E, to draw character potrait for given settings. 
+  Answer only the prompt to feed.
+
+  * Background: {{$background}}
+  * Plot: {{$plot}}
+  * Name: {{$name}}
+  * Age: {{$age}}
+  * Description: {{$description}}
+  
+  ---
+
+  Also, the following points must be emphasised. 
+  
+  * Starts with "Create a portrait in a realistic, watercolor style".
+  * Don't include any text on the image.
+  * Rough enough to get an impression of the character.
+  
+template_format: semantic-kernel
+description: A function that generates the prompt to generate profile picture for mystery game
+input_variables:
+  - name: background
+    description: The background for the setting. (e.g., Morden City, Sword & Magic World)
+    is_required: true
+  - name: plot
+    description: The synopsis of the game.
+    is_required: true
+  - name: age
+    description: The age of the character
+    is_required: true
+  - name: name
+    description: The name of the character
+    is_required: true
+  - name: description
+    description: The description of the character
+    is_required: true
+output_variable:
+  description: The prompt to draw character.
+execution_settings:
+  service1:
+    model_id: gpt-4o
+    temperature: 0.1

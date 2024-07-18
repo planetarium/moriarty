@@ -1,0 +1,58 @@
+﻿@page "/campaigns"
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext AppDbContext
+
+<h3>Campaigns</h3>
+
+@if (campaigns == null)
+{
+    <p>Loading...</p>
+}
+else if (campaigns.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Plot</th>
+                <th>Victim</th>
+                <th>Offender</th>
+                <th>Suspects</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var campaign in campaigns)
+            {
+                <tr>
+                    <td>@campaign.Title</td>
+                    <td>@campaign.Plot</td>
+                    <td>@campaign.Victim.Name</td>
+                    <td>@campaign.Offender.Name</td>
+                    <td>
+                        @foreach (Character suspect in campaign.Suspects)
+                        {
+                            <span>@suspect.Name</span><br />
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No campaigns found.</p>
+}
+<a href="/campaigns/new">Add Campaign</a>
+
+@code {
+    List<Campaign> campaigns;
+    protected override async Task OnInitializedAsync()
+    {
+        campaigns = await AppDbContext.Campaigns
+            .Include(c => c.Victim)
+            .Include(c => c.Offender)
+            .Include(c => c.Suspects)
+            .ToListAsync();
+    }
+}

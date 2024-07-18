@@ -38,6 +38,12 @@ namespace Moriarty.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Method")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Motive")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid>("OffenderId")
                         .HasColumnType("TEXT");
 
@@ -65,6 +71,9 @@ namespace Moriarty.Web.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Age")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .IsRequired()

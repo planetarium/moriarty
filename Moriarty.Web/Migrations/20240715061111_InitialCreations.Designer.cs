@@ -11,8 +11,8 @@ using Moriarty.Web.Data;
 namespace Moriarty.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240709073713_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240715061111_InitialCreations")]
+    partial class InitialCreations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,12 @@ namespace Moriarty.Web.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Method")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Motive")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("OffenderId")
@@ -68,6 +74,9 @@ namespace Moriarty.Web.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Age")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .IsRequired()

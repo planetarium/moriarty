@@ -21,45 +21,43 @@ public class ModelTest
     {
         var options = GetInMemoryOptions();
 
-        using (var context = new TestAppDbContext(options))
+        using var ctx1 = new TestAppDbContext(options);
+        var character1 = new Character
         {
-            var character1 = new Character
-            {
-                Id = Guid.NewGuid(),
-                Name = "Victim",
-                Description = "Victim Description",
-                ProfilePicture = new byte[0]
-            };
+            Id = Guid.NewGuid(),
+            Name = "Victim",
+            Description = "Victim Description",
+            ProfilePicture = new byte[0]
+        };
 
-            var character2 = new Character
-            {
-                Id = Guid.NewGuid(),
-                Name = "Offender",
-                Description = "Offender Description",
-                ProfilePicture = new byte[0]
-            };
+        var character2 = new Character
+        {
+            Id = Guid.NewGuid(),
+            Name = "Offender",
+            Description = "Offender Description",
+            ProfilePicture = new byte[0]
+        };
 
-            context.Characters.AddRange(character1, character2);
+        ctx1.Characters.AddRange(character1, character2);
 
-            var campaign = new Campaign
-            {
-                Id = Guid.NewGuid(),
-                Title = "Test Campaign",
-                Plot = "Test Plot",
-                Victim = character1,
-                Offender = character2,
-            };
+        var campaign = new Campaign
+        {
+            Id = Guid.NewGuid(),
+            Title = "Test Campaign",
+            Plot = "Test Plot",
+            Victim = character1,
+            Offender = character2,
+        };
 
-            context.Campaigns.Add(campaign);
-            context.SaveChanges();
-        }
+        ctx1.Campaigns.Add(campaign);
+        ctx1.SaveChanges();
 
-        using TestAppDbContext context = new(options);
-        var campaign = context.Campaigns.Include(c => c.Victim).Include(c => c.Offender).FirstOrDefault();
-        Assert.NotNull(campaign);
-        Assert.Equal("Test Campaign", campaign.Title);
-        Assert.Equal("Victim", campaign.Victim.Name);
-        Assert.Equal("Offender", campaign.Offender.Name);
+        using TestAppDbContext ctx2 = new(options);
+        var returned = ctx2.Campaigns.Include(c => c.Victim).Include(c => c.Offender).FirstOrDefault();
+        Assert.NotNull(returned);
+        Assert.Equal("Test Campaign", returned.Title);
+        Assert.Equal("Victim", returned.Victim.Name);
+        Assert.Equal("Offender", returned.Offender.Name);
     }
 
     [Fact]

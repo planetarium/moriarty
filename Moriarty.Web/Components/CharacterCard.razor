@@ -1,0 +1,49 @@
+@using Moriarty.Web.Data.Models
+@inject SemanticKernelService SemanticKernelService
+@inject HttpClient HttpClient
+
+<div class="character card col-sm-4">
+    @if (imgUrl is not null)
+    {
+        <img src="@imgUrl" class="card-img-top" />
+        <button type="button" @onclick="async () => {await CreatePotrait(Character);}">Refresh</button>
+    }
+    else
+    {
+        <button type="button" @onclick="async () => {await CreatePotrait(Character);}">Create Portrait</button>
+    }
+    <div class="card-body">
+        <label for=@($"character-{Character.Id}-name")>Name:</label>
+        <InputText id=@($"character-{Character.Id}-name") @bind-Value="Character.Name" class="form-control" />
+        <label for=@($"character-{Character.Id}-age")>Age:</label>
+        <InputNumber id=@($"character-{Character.Id}-age") @bind-Value="Character.Age" class="form-control" />
+        <label for=@($"character-{Character.Id}-description")>Description:</label>
+        <InputTextArea id=@($"character-{Character.Id}-description") @bind-Value="Character.Description" class="form-control" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Character Character { get; set; }
+
+    [Parameter]
+    public string Background { get; set; }
+
+    [Parameter]
+    public string Plot { get; set; }
+
+    private string imgUrl = null;
+
+    private async Task CreatePotrait(Character character)
+    {
+        imgUrl = await SemanticKernelService.GeneratePotraitAsync(
+            Background,
+            Plot,
+            character.Name,
+            character.Description,
+            character.Age,
+            default
+        );
+        character.ProfilePicture = await HttpClient.GetByteArrayAsync(imgUrl);
+    }
+}
