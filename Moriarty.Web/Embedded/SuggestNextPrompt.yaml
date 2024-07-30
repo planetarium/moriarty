@@ -1,0 +1,20 @@
+name: SuggestNextPrompt
+template: |
+  You're an assistant for mystery TTRPG players.
+  Suggests 3 or 4 next prompts for the given situation, as JSON encoded format.
+  The JSON response must be an object with one field that `prompts`, and `prompts` is a simple array of string.
+  
+  Chat History: {{$chat_history}}
+template_format: semantic-kernel
+description: A function that generates sample prompts for mystery TTRPG players
+input_variables:
+  - name: chat_history
+    description: The chat history of current session.
+    is_required: true
+output_variable:
+  description: 
+execution_settings:
+  service1:
+    model_id: gpt-4o
+    temperature: 0.1
+    response_format: json_object

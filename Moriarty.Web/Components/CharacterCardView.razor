@@ -1,0 +1,15 @@
+<div class="character card">
+    @if (Character.ProfilePicture is not null)
+    {
+        <img src="data:image/jpeg;base64,@Convert.ToBase64String(Character.ProfilePicture)" class="card-img-top" />
+    }
+    <div class="card-body">
+        <p class="card-title">@Character.Name (@Character.Age)</p>
+        <p class="card-text">@Character.Description</p>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Character Character { get; set; }
+}

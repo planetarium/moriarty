@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Moriarty.Web.Data.Models;
 
@@ -19,7 +20,9 @@ public class Character
     public int Age { get; set; }
 
     [Required]
+    [JsonIgnore]
     public byte[] ProfilePicture { get; set; }
 
+    [JsonIgnore]
     public ICollection<Campaign> SuspectedInCampaigns { get; set; } = [];
 }

@@ -49,14 +49,14 @@
         <hr />
 
         <h3>Victim</h3>
-        <CharacterCard Character="@draft.Victim" Plot="@draft.Plot" Background="@background" />
+        <CharacterCardForm Character="@draft.Victim" Plot="@draft.Plot" Background="@background" />
         <hr />
         
         <h3>Suspects</h3>
         <div class="row">
             @foreach (var suspect in draft.Suspects)
             {
-                <CharacterCard Character="@suspect" Plot="@draft.Plot" Background="@background" />
+                <CharacterCardForm Character="@suspect" Plot="@draft.Plot" Background="@background" />
             }
         </div>
         <hr />
@@ -114,6 +114,7 @@
 
     private async Task HandleSubmit(EditContext editContext)
     {
+        draft.OpenAIFileId = await SemanticKernelService.UploadFile(draft, default);
         await DbContext.Campaigns.AddAsync(draft);
         await DbContext.SaveChangesAsync();
         NavigationManager.NavigateTo("/campaigns");

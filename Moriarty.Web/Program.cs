@@ -16,8 +16,10 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddDbContext<AppDbContext>();
 
-builder.Services.AddSingleton<SemanticKernelService>();
 builder.Services.AddSingleton<PromptLoader>();
+builder.Services.AddSingleton<MarkdownService>();
+builder.Services.AddSingleton<GameBoardService>();
+builder.Services.AddScoped<SemanticKernelService>();
 builder.Services.AddScoped<HttpClient>();
 
 var app = builder.Build();

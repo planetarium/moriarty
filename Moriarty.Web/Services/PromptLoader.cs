@@ -13,7 +13,7 @@ public class PromptLoader
 
     public string Load(string name)
     {
-        using var stream = _assembly.GetManifestResourceStream($"{_assembly.GetName().Name}.Embedded.{name}.yaml")
+        using var stream = _assembly.GetManifestResourceStream($"{_assembly.GetName().Name}.Embedded.{name}")
             ?? throw new ArgumentException($"Given resource name {name} doesn't exist.", nameof(name));
         return new StreamReader(stream).ReadToEnd();
     }
