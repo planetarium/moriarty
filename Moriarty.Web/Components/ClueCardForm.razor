@@ -1,0 +1,12 @@
+<div class="card col-sm-4">
+    <div class="card-title">
+        <InputText class="form-control" @bind-Value="Clue.Name" />
+    </div>
+    <div class="card-body">
+        <InputTextArea class="form-control" @bind-Value="Clue.Description" />
+    </div>
+</div>
+@code {
+    [Parameter]
+    public Clue Clue { get; set; }
+}

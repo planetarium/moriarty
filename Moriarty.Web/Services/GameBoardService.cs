@@ -4,7 +4,7 @@ namespace Moriarty.Web.Services;
 
 public class GameBoardService
 {
-    private List<IGameBoard> _boards = [];
+    private readonly List<IGameBoard> _boards = [];
 
     public void Bind(IGameBoard board)
     {
@@ -43,6 +43,14 @@ public class GameBoardService
         foreach (IGameBoard board in _boards)
         {
             board.OnSceneChanged(description);
+        }
+    }
+
+    public void EndSesison()
+    {
+        foreach (IGameBoard board in _boards)
+        {
+            board.OnSessionEnded();
         }
     }
 }

@@ -14,6 +14,7 @@ template: |
   * `Offender`
   * `Motive`
   * `Method`
+  * `Clues`
 
   Also, `Suspects`, `Victim` and `Offender` share same scheme and has below keys.
 
@@ -22,6 +23,11 @@ template: |
   * `Description`
 
   `Offender` field is simple copy of one of `Suspects`.
+  
+  `Clues` is an array of `Clue` and `Clue` has below keys. `Clues` is consists of 3~5 `Clue`s.
+  
+  * `Name`
+  * `Description`
 
 template_format: semantic-kernel
 description: A function that generates a setting for mystery game.

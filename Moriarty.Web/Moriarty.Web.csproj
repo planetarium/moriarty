@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>39a917ea-82a8-488d-a615-8f91379c8b68</UserSecretsId>
-    <NoWarn>$(NoWarn);SKEXP0001;SKEXP0010;SKEXP0070;SKEXP0060</NoWarn>
+    <NoWarn>$(NoWarn);SKEXP0001;SKEXP0010;SKEXP0050;SKEXP0070;SKEXP0060</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,8 +20,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.16.1" />
+    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Sqlite" Version="1.16.1-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.16.1" />
     <PackageReference Include="Microsoft.SemanticKernel.Planners.OpenAI" Version="1.16.1-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel.Plugins.Memory" Version="1.16.1-alpha" />
     <PackageReference Include="Microsoft.SemanticKernel.Yaml" Version="1.16.1" />
   </ItemGroup>
 

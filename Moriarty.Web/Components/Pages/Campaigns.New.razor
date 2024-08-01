@@ -75,13 +75,21 @@
             <label for="method">Method:</label>
             <InputTextArea id="method" @bind-Value="draft.Method" class="form-control" />
         </div>
+        
+        <h3>Clues</h3>
+        <div class="row">
+            @foreach (var clue in draft.Clues)
+            {
+                <ClueCardForm Clue="@clue" />
+            }
+        </div>
 
         <button type="submit" class="btn btn-primary">Submit</button>
     </EditForm>
 }
 
 @code {
-    Campaign draft = null;
+    Campaign draft;
 
     bool loading = false;
 

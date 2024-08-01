@@ -102,6 +102,13 @@ else
             <InputTextArea id="motive" class="form-control" @bind-Value="campaign.Method" />
         </div>
 
+        <div class="row form-group">
+            @foreach (Clue clue in campaign.Clues)
+            {
+                <ClueCardForm Clue="@clue" />
+            }
+        </div>
+
         <button type="submit" class="btn btn-primary">Save</button>
         <button type="button" @onclick="@(()=>NavigationManager.NavigateTo("/campaigns"))" class="btn btn-secondary">Cancel</button>
     </EditForm>

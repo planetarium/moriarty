@@ -31,8 +31,10 @@ public class Campaign
     public string Method { get; set; }
 
     public string OpenAIFileId { get; set;}
-
+    
     public ICollection<Character> Suspects { get; set; } = [];
+
+    public ICollection<Clue> Clues { get; set; } = [];
 
     public string LLMInstruction
     {

@@ -3,8 +3,9 @@ using System.Text.Json;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
+using Microsoft.SemanticKernel.Memory;
+using Microsoft.SemanticKernel.Plugins.Memory;
 using Microsoft.SemanticKernel.TextToImage;
-using Moriarty.Web.Data;
 using Moriarty.Web.Data.Models;
 using Moriarty.Web.LLMPlugins;
 
@@ -14,23 +15,23 @@ public class SemanticKernelService {
     private readonly Kernel _kernel;
     private readonly PromptLoader _promptLoader;
 
-    public Kernel Kernel => _kernel;
-
     public SemanticKernelService(
         IConfiguration configuration,
         PromptLoader promptLoader,
-        GameBoardService gameBoardService,
-        AppDbContext appDbContext) {
+        CampaignPlugin campaignPlugin,
+        ILoggerFactory loggerFactory) {
         string apiKey = configuration["OpenAI:ApiKey"];
-        string model = configuration["OpenAI:ChatCompletionModel"];
-        
-        var builder = Kernel.CreateBuilder()
-            .AddOpenAIChatCompletion(model, apiKey)
-            .AddOpenAITextToImage(modelId: "dall-e-3", apiKey: apiKey)
+        string chatCompletionModel = configuration["OpenAI:ChatCompletionModel"];
+        string textToImageModel = configuration["OpenAI:TextToImageModel"];
+
+        IKernelBuilder builder = Kernel.CreateBuilder()
+            .AddOpenAIChatCompletion(modelId: chatCompletionModel, apiKey: apiKey)
+            .AddOpenAITextToImage(modelId: textToImageModel, apiKey: apiKey)
             .AddOpenAIFiles(apiKey);
 
+        builder.Services.AddSingleton(loggerFactory);
+        builder.Plugins.AddFromObject(campaignPlugin);
         _kernel = builder.Build();
-        _kernel.Plugins.AddFromObject(new CampaignPlugin(appDbContext, gameBoardService));
         _promptLoader = promptLoader;
     }
 
@@ -87,14 +88,16 @@ public class SemanticKernelService {
             executionSettings: new OpenAIPromptExecutionSettings()
             {
               ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-              ChatSystemPrompt = chatSystemPrompt, 
+              ChatSystemPrompt = chatSystemPrompt,
+              Temperature = 0.7,
+              TopP = 0.7,
             },
             kernel: _kernel,
             cancellationToken: cancellationToken);
         return content[0].Content;
     }
 
-    public async Task<string> GeneratePotraitAsync(
+    public async Task<string> GeneratePortraitAsync(
         string background,
         string plot,
         string name,
@@ -102,7 +105,7 @@ public class SemanticKernelService {
         int age,
         CancellationToken cancellationToken
     ) {
-        string prompt = _promptLoader.Load("GeneratePotrait.yaml");
+        string prompt = _promptLoader.Load("GeneratePortrait.yaml");
         ITextToImageService tti = _kernel.GetRequiredService<ITextToImageService>();
         KernelFunction function = _kernel.CreateFunctionFromPromptYaml(prompt);
         string ttiPrompt = await _kernel.InvokeAsync<string>(

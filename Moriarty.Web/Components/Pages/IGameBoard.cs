@@ -9,4 +9,5 @@ public interface IGameBoard
     void OnVictimDisplayed(Character character);
 
     void OnSceneChanged(string background);
+    void OnSessionEnded();
 }

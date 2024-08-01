@@ -49,5 +49,13 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(c => c.OffenderId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        // Add this part to configure the one-to-many relationship between Campaign and Clue
+        modelBuilder.Entity<Campaign>()
+            .HasMany(c => c.Clues)
+            .WithOne(c => c.Campaign)
+            .HasForeignKey(c => c.CampaignId)
+            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

@@ -1,9 +1,0 @@
-diff a/Moriarty.Web/Embedded/GeneratePotrait.yaml b/Moriarty.Web/Embedded/GeneratePotrait.yaml	(rejected hunks)
-@@ -1,6 +1,6 @@
- name: GeneratePotrait
- template: |
--  Generate prompt for Dall-E, to draw character potrait for given settings. 
-+  Generate a prompt for Dall-E, to draw character potrait for given settings. 
-   Answer only the prompt to feed.
- 
-   * Background: {{$background}}

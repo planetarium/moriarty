@@ -24,6 +24,8 @@
     private string _scene;
 
     private List<string> _suggestedPrompts = [];
+    
+    private bool _ended;
 
     public void Dispose()
     {
@@ -93,13 +95,22 @@
     {
         _scene = description;
     }
+
+    public void OnSessionEnded()
+    {
+        _ended = true;
+    }
 }
 <div class="container">
+    @if (_ended)
+    {
+        <p>Current session has been ended.</p>
+    }
     @if (_scene is not null)
     {
         <div class="row">
             Scene: @_scene
-        </div>   
+        </div>
     }
     <div class="row">
         <div class="col-lg-2">
@@ -118,17 +129,13 @@
                 }
             </div>
             <div class="chat-input">
-                <select>
-                    <option>Talk</option>
-                    <option>Action</option>
-                </select>
                 <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@_waitingResponse/>
                 <button class="btn btn-primary" @onclick="SendMessage" disabled="@_waitingResponse">Submit</button>
                 <button class="btn btn-secondary" @onclick="SuggestNextPrompt">Suggest</button>
             </div>
             @if (_suggestedPrompts.Any())
             {
-                <hr />
+                <hr/>
                 <div>
                     <h5>Suggestions</h5>
                     <ul>

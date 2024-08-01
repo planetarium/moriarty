@@ -1,6 +1,6 @@
-name: GeneratePotrait
+name: GeneratePortrait
 template: |
-  Generate prompt for Dall-E, to draw character potrait for given settings. 
+  Generate prompt for Dall-E, to draw character portrait for given settings. 
   Answer only the prompt to feed.
 
   * Background: {{$background}}

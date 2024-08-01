@@ -1,5 +1,6 @@
 using Moriarty.Web.Components;
 using Moriarty.Web.Data;
+using Moriarty.Web.LLMPlugins;
 using Moriarty.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddSingleton<PromptLoader>();
 builder.Services.AddSingleton<MarkdownService>();
 builder.Services.AddSingleton<GameBoardService>();
+builder.Services.AddScoped<CampaignPlugin>();
 builder.Services.AddScoped<SemanticKernelService>();
 builder.Services.AddScoped<HttpClient>();
 
