@@ -4,11 +4,11 @@
 
 <h3>Campaigns</h3>
 
-@if (campaigns == null)
+@if (_campaigns == null)
 {
     <p>Loading...</p>
 }
-else if (campaigns.Any())
+else if (_campaigns.Any())
 {
     <table class="table">
         <thead>
@@ -22,7 +22,7 @@ else if (campaigns.Any())
             </tr>
         </thead>
         <tbody>
-            @foreach (var campaign in campaigns)
+            @foreach (var campaign in _campaigns)
             {
                 <tr>
                     <td>@campaign.Title</td>
@@ -51,10 +51,10 @@ else
 <a href="/campaigns/new">Add Campaign</a>
 
 @code {
-    List<Campaign> campaigns;
+    List<Campaign> _campaigns;
     protected override async Task OnInitializedAsync()
     {
-        campaigns = await AppDbContext.Campaigns
+        _campaigns = await AppDbContext.Campaigns
             .Include(c => c.Victim)
             .Include(c => c.Offender)
             .Include(c => c.Suspects)

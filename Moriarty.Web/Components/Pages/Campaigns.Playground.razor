@@ -1,7 +1,7 @@
 @page "/campaigns/{CampaignId:guid}/playground"
 @using Microsoft.SemanticKernel
 @using Microsoft.SemanticKernel.ChatCompletion
-@inject SemanticKernelService SemanticKernelService
+@inject GameMaster GameMaster
 @inject MarkdownService MarkdownService
 @inject GameBoardService GameBoardService
 
@@ -52,7 +52,7 @@
     {
         return new(
             "GM", 
-            await SemanticKernelService.Chat(
+            await GameMaster.ChatAsync(
                 CampaignId,
                 new ChatHistory(_messages.Select(m => new ChatMessageContent(AuthorRole.User, m.Text))), 
                 default));
@@ -75,7 +75,7 @@
     private async Task SuggestNextPrompt()
     {
         string history = string.Join("\n", _messages.Select(c => $"{c.Sender}: {c.Text}"));
-        _suggestedPrompts = await SemanticKernelService.SuggestNextPrompt(history, default);
+        _suggestedPrompts = await GameMaster.SuggestNextPromptAsync(history, default);
     }
 
     public void OnVictimDisplayed(Character character)

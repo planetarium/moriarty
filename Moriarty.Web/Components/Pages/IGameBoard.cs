@@ -1,6 +1,6 @@
 using Moriarty.Web.Data.Models;
 
-namespace Moriarty.Web;
+namespace Moriarty.Web.Components.Pages;
 
 public interface IGameBoard
 {

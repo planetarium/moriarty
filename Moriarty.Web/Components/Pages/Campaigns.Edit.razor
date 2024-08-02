@@ -2,26 +2,26 @@
 @using Microsoft.EntityFrameworkCore
 @inject AppDbContext AppDbContext
 @inject NavigationManager NavigationManager
-@inject SemanticKernelService SemanticKernelService
+@inject CampaignBuilder CampaignBuilder
 @inject ILogger<Campaigns_Edit> Logger
 
 @code {
     [Parameter]
-    public Guid campaignId { get; set; }
+    public Guid CampaignId { get; set; }
 
-    private Campaign campaign;
+    private Campaign _campaign;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            campaign = await AppDbContext.Campaigns
+            _campaign = await AppDbContext.Campaigns
                 .Include(c => c.Victim)
                 .Include(c => c.Offender)
                 .Include(c => c.Suspects)
-                .FirstOrDefaultAsync(c => c.Id == campaignId);
+                .FirstOrDefaultAsync(c => c.Id == CampaignId);
 
-            if (campaign == null)
+            if (_campaign == null)
             {
                 // Handle the case when the campaign is not found
                 NavigationManager.NavigateTo("/campaigns");
@@ -37,11 +37,11 @@
     {
         try
         {
-            campaign.OpenAIFileId = await SemanticKernelService.UploadFile(
-                campaign: campaign,
+            _campaign.OpenAIFileId = await CampaignBuilder.UploadFileAsync(
+                campaign: _campaign,
                 cancellationToken: default
             );
-            AppDbContext.Campaigns.Update(campaign);
+            AppDbContext.Campaigns.Update(_campaign);
             await AppDbContext.SaveChangesAsync();
             NavigationManager.NavigateTo("/campaigns");
         }
@@ -54,56 +54,56 @@
 
 <h3>Edit Campaign</h3>
 
-@if (campaign == null)
+@if (_campaign == null)
 {
     <p>Loading...</p>
 }
 else
 {
-    <EditForm Model="@campaign" OnValidSubmit="SaveChanges">
+    <EditForm Model="@_campaign" OnValidSubmit="SaveChanges">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
         <div class="form-group">
             <label for="title">Title</label>
-            <InputText id="title" class="form-control" @bind-Value="campaign.Title" />
+            <InputText id="title" class="form-control" @bind-Value="_campaign.Title" />
         </div>
 
         <div class="form-group">
             <label for="plot">Plot</label>
-            <InputTextArea id="plot" class="form-control" @bind-Value="campaign.Plot" />
+            <InputTextArea id="plot" class="form-control" @bind-Value="_campaign.Plot" />
         </div>
         
         <h3>Victim</h3>
         <div class="row form-group">
-            <CharacterCardForm Character=@campaign.Victim Plot=@campaign.Plot />
+            <CharacterCardForm Character=@_campaign.Victim Plot=@_campaign.Plot />
         </div>
 
         <h3>Suspects</h3>
         <div class="row form-group">
-        @foreach (var suspect in campaign.Suspects)
+        @foreach (var suspect in _campaign.Suspects)
         {
-            <CharacterCardForm Character=@suspect Plot=@campaign.Plot />
+            <CharacterCardForm Character=@suspect Plot=@_campaign.Plot />
         }
         </div>
 
         <div class="form-group">
             <label for="offender">Offender</label>
-            <InputText id="offender" class="form-control" @bind-Value="campaign.Offender.Name" />
+            <InputText id="offender" class="form-control" @bind-Value="_campaign.Offender.Name" />
         </div>
 
         <div class="form-group">
             <label for="motive">Motive</label>
-            <InputTextArea id="motive" class="form-control" @bind-Value="campaign.Motive" />
+            <InputTextArea id="motive" class="form-control" @bind-Value="_campaign.Motive" />
         </div>
 
         <div class="form-group">
             <label for="motive">Method</label>
-            <InputTextArea id="motive" class="form-control" @bind-Value="campaign.Method" />
+            <InputTextArea id="motive" class="form-control" @bind-Value="_campaign.Method" />
         </div>
 
         <div class="row form-group">
-            @foreach (Clue clue in campaign.Clues)
+            @foreach (Clue clue in _campaign.Clues)
             {
                 <ClueCardForm Clue="@clue" />
             }

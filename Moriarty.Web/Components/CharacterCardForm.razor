@@ -1,5 +1,5 @@
-@inject SemanticKernelService SemanticKernelService
 @inject HttpClient HttpClient
+@inject CampaignBuilder CampaignBuilder
 
 <div class="character card col-sm-4">
     @if (Character.ProfilePicture is not null)
@@ -35,7 +35,7 @@
 
     private async Task CreatePortrait(Character character)
     {
-        imgUrl = await SemanticKernelService.GeneratePortraitAsync(
+        imgUrl = await CampaignBuilder.GeneratePortraitAsync(
             Background,
             Plot,
             character.Name,

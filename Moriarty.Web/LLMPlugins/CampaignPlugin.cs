@@ -69,7 +69,7 @@ public class CampaignPlugin
     }
 
     [KernelFunction("end_session")]
-    [Description("Ends the current session and deactive all interface when end of game.")]
+    [System.ComponentModel.Description("Ends the current session and deactive all interface when end of game.")]
     public void EndSession()
     {
         _gameBoardService.EndSesison();

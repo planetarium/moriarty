@@ -1,8 +1,6 @@
 @page "/campaigns/new"
-@using Microsoft.EntityFrameworkCore
-@using System.Text.Json
 @inject AppDbContext DbContext
-@inject SemanticKernelService SemanticKernelService
+@inject CampaignBuilder CampaignBuilder;
 @inject NavigationManager NavigationManager
 
 <h1>Create New Campaign</h1>
@@ -11,7 +9,7 @@
 <form>
     <div class="form-group">
         <label for="language">Language</label>
-        <select class="form-control" name="language" @bind="language">
+        <select class="form-control" id="language" name="language" @bind="_language">
             <option>English</option>
             <option>한국어</option>
             <option>日本語</option>
@@ -19,7 +17,7 @@
     </div>
     <div class="form-group">
         <label for="background">Background</label>
-        <select class="form-control" name="background" @bind="background">
+        <select class="form-control" id="background" name="background" @bind="_background">
             <option>Morden</option>
             <option>Cyberfunk</option>
             <option>Fantasy</option>
@@ -27,36 +25,36 @@
     </div>
     <div class="form-group">
         <label for="num_of_suspects">Number of suspects</label>
-        <input type="number" class="form-control" min="2" max="10" @bind-value="suspects" />
+        <input id="num_of_suspects" type="number" class="form-control" min="2" max="10" @bind-value="_suspects" />
     </div>
 
-    <button type="button" class="btn btn-primary" @onclick="Scaffold" disabled=@loading>Next</button>
+    <button type="button" class="btn btn-primary" @onclick="Scaffold" disabled=@_loading>Next</button>
 </form>
 
-@if (draft != null)
+@if (_draft != null)
 {
     <h2>Review Draft</h2>
-    <EditForm Model="draft" OnSubmit="HandleSubmit">
+    <EditForm Model="_draft" OnSubmit="HandleSubmit">
         <h3>Overview</h3>
         <div>
             <label for="title">Title:</label>
-            <InputText id="title" @bind-Value="draft.Title" class="form-control" />
+            <InputText id="title" @bind-Value="_draft.Title" class="form-control" />
         </div>
         <div>
             <label for="plot">Plot:</label>
-            <InputTextArea id="plot" @bind-Value="draft.Plot" class="form-control" />
+            <InputTextArea id="plot" @bind-Value="_draft.Plot" class="form-control" />
         </div>
         <hr />
 
         <h3>Victim</h3>
-        <CharacterCardForm Character="@draft.Victim" Plot="@draft.Plot" Background="@background" />
+        <CharacterCardForm Character="@_draft.Victim" Plot="@_draft.Plot" Background="@_background" />
         <hr />
         
         <h3>Suspects</h3>
         <div class="row">
-            @foreach (var suspect in draft.Suspects)
+            @foreach (var suspect in _draft.Suspects)
             {
-                <CharacterCardForm Character="@suspect" Plot="@draft.Plot" Background="@background" />
+                <CharacterCardForm Character="@suspect" Plot="@_draft.Plot" Background="@_background" />
             }
         </div>
         <hr />
@@ -65,20 +63,20 @@
         <div>
             <label for="offender">Name:</label>
             <select id="offender" class="form-select" @onchange="(e) => { UpdateOffender((string)e.Value); }">
-                @foreach (var suspect in draft.Suspects)
+                @foreach (var suspect in _draft.Suspects)
                 {
-                    <option selected=@(suspect.Name == draft.Offender.Name)>@suspect.Name</option>
+                    <option selected=@(suspect.Name == _draft.Offender.Name)>@suspect.Name</option>
                 }
             </select>
             <label for="motive">Motive:</label>
-            <InputText id="motive" @bind-Value="draft.Motive" class="form-control" />
+            <InputText id="motive" @bind-Value="_draft.Motive" class="form-control" />
             <label for="method">Method:</label>
-            <InputTextArea id="method" @bind-Value="draft.Method" class="form-control" />
+            <InputTextArea id="method" @bind-Value="_draft.Method" class="form-control" />
         </div>
         
         <h3>Clues</h3>
         <div class="row">
-            @foreach (var clue in draft.Clues)
+            @foreach (var clue in _draft.Clues)
             {
                 <ClueCardForm Clue="@clue" />
             }
@@ -89,41 +87,38 @@
 }
 
 @code {
-    Campaign draft;
+    Campaign _draft;
 
-    bool loading = false;
+    bool _loading;
 
-    string prompt;
+    string _language;
 
-    string language;
+    string _background;
 
-    string background;
-
-    int suspects;
+    int _suspects;
 
     private async Task Scaffold()
     {
-        loading = true;
-        prompt = await SemanticKernelService.GenerateCampaign(
-            background,
-            suspects,
-            language,
+        _loading = true;
+        _draft = await CampaignBuilder.GenerateDraftAsnyc(
+            _background,
+            _suspects,
+            _language,
             default
         );
-        draft = JsonSerializer.Deserialize<Campaign>(prompt);
-        UpdateOffender(draft.Offender.Name);
-        loading = false;
+        UpdateOffender(_draft.Offender.Name);
+        _loading = false;
     }
 
     public void UpdateOffender(string name)
     {
-        draft.Offender = draft.Suspects.First(c => c.Name == name);
+        _draft.Offender = _draft.Suspects.First(c => c.Name == name);
     }
 
     private async Task HandleSubmit(EditContext editContext)
     {
-        draft.OpenAIFileId = await SemanticKernelService.UploadFile(draft, default);
-        await DbContext.Campaigns.AddAsync(draft);
+        _draft.OpenAIFileId = await CampaignBuilder.UploadFileAsync(_draft, default);
+        await DbContext.Campaigns.AddAsync(_draft);
         await DbContext.SaveChangesAsync();
         NavigationManager.NavigateTo("/campaigns");
     }

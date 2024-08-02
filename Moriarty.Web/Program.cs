@@ -1,3 +1,4 @@
+using Microsoft.SemanticKernel;
 using Moriarty.Web.Components;
 using Moriarty.Web.Data;
 using Moriarty.Web.LLMPlugins;
@@ -20,9 +21,27 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddSingleton<PromptLoader>();
 builder.Services.AddSingleton<MarkdownService>();
 builder.Services.AddSingleton<GameBoardService>();
-builder.Services.AddScoped<CampaignPlugin>();
-builder.Services.AddScoped<SemanticKernelService>();
+builder.Services.AddScoped<GameMaster>();
+builder.Services.AddScoped<CampaignBuilder>();
 builder.Services.AddScoped<HttpClient>();
+builder.Services.AddScoped<CampaignPlugin>();
+builder.Services.AddScoped(sp =>
+{
+    IConfiguration configuration = sp.GetRequiredService<IConfiguration>();
+    ILoggerFactory loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+    string apiKey = configuration["OpenAI:ApiKey"];
+    string chatCompletionModel = configuration["OpenAI:ChatCompletionModel"];
+    string textToImageModel = configuration["OpenAI:TextToImageModel"];
+
+    IKernelBuilder kernelBuilder = Kernel.CreateBuilder()
+        .AddOpenAIChatCompletion(modelId: chatCompletionModel, apiKey: apiKey)
+        .AddOpenAITextToImage(modelId: textToImageModel, apiKey: apiKey)
+        .AddOpenAIFiles(apiKey);
+
+    kernelBuilder.Plugins.AddFromObject(sp.GetRequiredService<CampaignPlugin>());
+    kernelBuilder.Services.AddSingleton(loggerFactory);
+    return kernelBuilder.Build();
+});
 
 var app = builder.Build();
 
