@@ -78,7 +78,7 @@
         <div class="row">
             @foreach (var clue in _draft.Clues)
             {
-                <ClueCardForm Clue="@clue" />
+                <ClueCardForm Clue="@clue" OnClueDeleted="DeleteClue" />
             }
         </div>
 
@@ -113,6 +113,11 @@
     public void UpdateOffender(string name)
     {
         _draft.Offender = _draft.Suspects.First(c => c.Name == name);
+    }
+
+    private void DeleteClue(Clue clue)
+    {
+        _draft.Clues.Remove(clue);
     }
 
     private async Task HandleSubmit(EditContext editContext)

@@ -1,12 +1,22 @@
 <div class="card col-sm-4">
-    <div class="card-title">
-        <InputText class="form-control" @bind-Value="Clue.Name" />
-    </div>
     <div class="card-body">
+        <InputText class="form-control" @bind-Value="Clue.Name" />
         <InputTextArea class="form-control" @bind-Value="Clue.Description" />
+        <button class="form-control btn btn-danger" type="button" @onclick="HandleDelete">Delete</button>
     </div>
 </div>
 @code {
     [Parameter]
     public Clue Clue { get; set; }
+
+    [Parameter]
+    public EventCallback<Clue> OnClueDeleted { get; set; }
+
+    private async Task HandleDelete()
+    {
+        if (OnClueDeleted.HasDelegate)
+        {
+            await OnClueDeleted.InvokeAsync(Clue);
+        }
+    }
 }
