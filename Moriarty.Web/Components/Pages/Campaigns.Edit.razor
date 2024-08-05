@@ -76,14 +76,14 @@ else
         
         <h3>Victim</h3>
         <div class="row form-group">
-            <CharacterCardForm Character=@_campaign.Victim Plot=@_campaign.Plot />
+            <CharacterCardForm Character=@_campaign.Victim Campaign=@_campaign />
         </div>
 
         <h3>Suspects</h3>
         <div class="row form-group">
         @foreach (var suspect in _campaign.Suspects)
         {
-            <CharacterCardForm Character=@suspect Plot=@_campaign.Plot />
+            <CharacterCardForm Character=@suspect Campaign="_campaign" />
         }
         </div>
 

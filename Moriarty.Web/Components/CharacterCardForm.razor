@@ -7,7 +7,7 @@
         <img src="data:image/jpeg;base64,@Convert.ToBase64String(Character.ProfilePicture)" class="card-img-top"/>
     }
     <div class="card-body">
-        @if (_loading)
+        @if (_refreshingPortrait)
         {
             <div class="spinner card-img-top"></div>
         }
@@ -20,7 +20,8 @@
         <label for=@($"character-{Character.Id}-age")>Age:</label>
         <InputNumber id=@($"character-{Character.Id}-age") @bind-Value="Character.Age" class="form-control"/>
         <label for=@($"character-{Character.Id}-description")>Description:</label>
-        <InputTextArea id=@($"character-{Character.Id}-description") @bind-Value="Character.Description" class="form-control"/>
+        <InputTextArea id=@($"character-{Character.Id}-description") @bind-Value="Character.Description" class="form-control" disabled="@_enhancingDescription"/>
+        <button type="button" class="form-control btn" @onclick="EnhanceCharacterDescription" disabled="@_enhancingDescription">Enhance Description</button>
     </div>
 </div>
 <style>
@@ -47,11 +48,13 @@
     public string Background { get; set; }
 
     [Parameter]
-    public string Plot { get; set; }
+    public Campaign Campaign { get; set; }
     
     private string _imgUrl = null;
 
-    private bool _loading;
+    private bool _refreshingPortrait;
+
+    private bool _enhancingDescription;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -63,16 +66,24 @@
 
     private async Task CreatePortrait()
     {
-        _loading = true;
+        _refreshingPortrait = true;
         _imgUrl = await CampaignBuilder.GeneratePortraitAsync(
             Background,
-            Plot,
+            Campaign.Plot,
             Character.Name,
             Character.Description,
             Character.Age,
             default
         );
         Character.ProfilePicture = await HttpClient.GetByteArrayAsync(_imgUrl);
-        _loading = false;
+        _refreshingPortrait = false;
     }
+
+    private async Task EnhanceCharacterDescription()
+    {
+        _enhancingDescription = true;
+        Character.Description = await CampaignBuilder.EnhanceCharacterDescriptionAsync(Campaign, Character, default);
+        _enhancingDescription = false;
+    }
+
 }

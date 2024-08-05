@@ -54,7 +54,7 @@
         <div class="row">
             @foreach (var suspect in _draft.Suspects)
             {
-                <CharacterCardForm Character="@suspect" Plot="@_draft.Plot" Background="@_background" />
+                <CharacterCardForm Character="@suspect" Campaign="_draft" Background="@_background" />
             }
         </div>
         <hr />
@@ -75,6 +75,7 @@
         </div>
         
         <h3>Clues</h3>
+        <button type="button" class="form-control btn" @onclick="AddClue">Add Clue</button>
         <div class="row">
             @foreach (var clue in _draft.Clues)
             {
@@ -126,5 +127,11 @@
         await DbContext.Campaigns.AddAsync(_draft);
         await DbContext.SaveChangesAsync();
         NavigationManager.NavigateTo("/campaigns");
+    }
+
+    private async Task AddClue()
+    {
+        Clue clue = await CampaignBuilder.CreateClueAsync(_draft, default);
+        _draft.Clues.Add(clue);
     }
 }

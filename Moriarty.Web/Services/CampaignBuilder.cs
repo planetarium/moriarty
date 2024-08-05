@@ -43,6 +43,39 @@ public class CampaignBuilder
         return JsonSerializer.Deserialize<Campaign>(asJson);
     }
 
+    public async Task<Clue> CreateClueAsync(Campaign campaign, CancellationToken cancellationToken)
+    {
+        string prompt = _promptLoader.Load("CreateClue.yaml");
+        KernelFunction function = _kernel.CreateFunctionFromPromptYaml(prompt);
+        string asJson = await _kernel.InvokeAsync<string>(
+            function,
+            arguments: new()
+            {
+                { "campaign", JsonSerializer.Serialize(campaign) },
+            },
+            cancellationToken);
+
+        return JsonSerializer.Deserialize<Clue>(asJson);
+    }
+
+    public async Task<string> EnhanceCharacterDescriptionAsync(
+        Campaign campaign,
+        Character character,
+        CancellationToken cancellationToken
+    )
+    {
+        string prompt = _promptLoader.Load("EnhanceCharacterDescription.yaml");
+        KernelFunction function = _kernel.CreateFunctionFromPromptYaml(prompt);
+        return await _kernel.InvokeAsync<string>(
+            function,
+            arguments: new()
+            {
+                { "campaign", JsonSerializer.Serialize(campaign) },
+                { "character", JsonSerializer.Serialize(character) },
+            },
+            cancellationToken);
+    }
+
     public async Task<string> UploadFileAsync(
         Campaign campaign,
         CancellationToken cancellationToken)

@@ -1,0 +1,26 @@
+name: EnhanceCharacterDescription
+template: |
+  Enhance the description of character based upon below campaign settings.
+  
+  Character: {{$character}}
+  Campaign: {{$campaign}}
+  
+  * Return only the description of given character, without that character's name, age, any other information or title.
+  * Don't write down about offender, method and motivation since it's redundant.
+  * Consider the relationship with other characters in the given campaign.
+  * Use same language to the given information's.
+template_format: semantic-kernel
+description: A function that enhance the character description for given the campaign setting.
+input_variables:
+  - name: campaign
+    description: The JSON encoded campaign settings about mystery game.
+    is_required: true
+  - name: character
+    description: The JSON encoded character information.
+    is_required: true
+output_variable:
+  description: The enhanced description for that character.
+execution_settings:
+  service1:
+    model_id: gpt-4o
+    temperature: 0.7

@@ -1,0 +1,25 @@
+name: CreateClue
+template: |
+  Create a new `Clue` for text based mystery game, with given settings.
+  Campaign: {{$campaign}}
+  
+  Returns JSON encoded object with below keys.
+
+  * `Name`
+  * `Description`
+  
+  `Name` and `Description` should be written same language of given campaign settings.
+  
+template_format: semantic-kernel
+description: A function that generates new clue for given campaign.
+input_variables:
+  - name: campaign
+    description: The JSON encoded campaign settings about mystery game.
+    is_required: true
+output_variable:
+  description: The created clue for given campaign
+execution_settings:
+  service1:
+    model_id: gpt-4o
+    temperature: 0.1
+    response_format: json_object

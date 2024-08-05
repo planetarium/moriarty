@@ -38,7 +38,7 @@ input_variables:
   - name: background
     description: The background for the setting. (e.g., Morden City, Sword & Magic World)
     is_required: false
-    default: "Morden"
+    default: "Modern"
   - name: suspects
     description: Number of suspects in the settings.
     is_required: false
