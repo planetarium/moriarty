@@ -39,6 +39,11 @@
 
     private async Task SendMessage()
     {
+        if (string.IsNullOrEmpty(_userInput))
+        {
+            return;
+        }
+        
         _waitingResponse = true;
         _messages.Add(new("User", _userInput));
         _userInput = "";
@@ -102,10 +107,6 @@
     }
 }
 <div class="container">
-    @if (_ended)
-    {
-        <p>Current session has been ended.</p>
-    }
     @if (_scene is not null)
     {
         <div class="row">
@@ -129,9 +130,9 @@
                 }
             </div>
             <div class="chat-input">
-                <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@_waitingResponse/>
-                <button class="btn btn-primary" @onclick="SendMessage" disabled="@_waitingResponse">Submit</button>
-                <button class="btn btn-secondary" @onclick="SuggestNextPrompt">Suggest</button>
+                <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@(_waitingResponse || _ended) />
+                <button class="btn btn-primary" @onclick="SendMessage" disabled="@(_waitingResponse || _ended)">Submit</button>
+                <button class="btn btn-secondary" @onclick="SuggestNextPrompt" disabled=@_ended>Suggest</button>
             </div>
             @if (_suggestedPrompts.Any())
             {
@@ -201,3 +202,4 @@
 </style>
 
 @implements IGameBoard;
+@implements IDisposable;
