@@ -25,6 +25,7 @@ builder.Services.AddScoped<GameMaster>();
 builder.Services.AddScoped<CampaignBuilder>();
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddScoped<CampaignPlugin>();
+builder.Services.AddScoped<GameBoardPlugin>();
 builder.Services.AddScoped(sp =>
 {
     IConfiguration configuration = sp.GetRequiredService<IConfiguration>();
@@ -39,6 +40,7 @@ builder.Services.AddScoped(sp =>
         .AddOpenAIFiles(apiKey);
 
     kernelBuilder.Plugins.AddFromObject(sp.GetRequiredService<CampaignPlugin>());
+    kernelBuilder.Plugins.AddFromObject(sp.GetRequiredService<GameBoardPlugin>());
     kernelBuilder.Services.AddSingleton(loggerFactory);
     return kernelBuilder.Build();
 });
