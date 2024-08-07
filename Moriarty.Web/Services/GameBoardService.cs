@@ -27,7 +27,7 @@ public class GameBoardService
     {
         foreach (IGameBoard board in _boards)
         {
-            board.OnSuspectDisplayed(suspect);
+            board.DisplaySuspect(suspect);
         }
     }
 
@@ -35,7 +35,7 @@ public class GameBoardService
     {
         foreach (IGameBoard board in _boards)
         {
-            board.OnVictimDisplayed(victim);
+            board.DisplayVictim(victim);
         }
     }
 
@@ -43,7 +43,7 @@ public class GameBoardService
     {
         foreach (IGameBoard board in _boards)
         {
-            board.OnSceneChanged(description);
+            board.ChangeScene(description);
         }
     }
 
@@ -51,7 +51,7 @@ public class GameBoardService
     {
         foreach (IGameBoard board in _boards)
         {
-            board.OnSessionEnded();
+            board.EndSession();
         }
     }
 }

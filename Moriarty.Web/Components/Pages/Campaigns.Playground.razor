@@ -86,12 +86,12 @@
         _suggestedPrompts = await GameMaster.SuggestNextPromptAsync(history, default);
     }
 
-    public void OnVictimDisplayed(Character character)
+    public void DisplayVictim(Character character)
     {
         _victim = character;
     }
 
-    public void OnSuspectDisplayed(Character character)
+    public void DisplaySuspect(Character character)
     {
         if (!_suspects.Contains(character))
         {
@@ -99,12 +99,12 @@
         }
     }
 
-    public void OnSceneChanged(string description)
+    public void ChangeScene(string description)
     {
         _scene = description;
     }
 
-    public void OnSessionEnded()
+    public void EndSession()
     {
         _ended = true;
     }
