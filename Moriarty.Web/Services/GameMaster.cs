@@ -24,15 +24,15 @@ public class GameMaster
         CancellationToken cancellationToken
     )
     {
-        string gmPrompt = _promptLoader.Load("GameMaster.txt");
+        string systemPrompt = _promptLoader.Load("GameMaster.txt");
         IChatCompletionService completion = _kernel.GetRequiredService<IChatCompletionService>();
-        var chatSystemPrompt = gmPrompt + $"Current Campaign is {campaignId}";
+        systemPrompt += $"Current Campaign is {campaignId}";
         var content = await completion.GetChatMessageContentsAsync(
             history,
             executionSettings: new OpenAIPromptExecutionSettings()
             {
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-                ChatSystemPrompt = chatSystemPrompt,
+                ChatSystemPrompt = systemPrompt,
                 Temperature = 0.7,
                 TopP = 0.7,
             },
@@ -42,7 +42,7 @@ public class GameMaster
     }
     
     public async Task<List<string>> SuggestNextPromptAsync(
-        string history,
+        ChatHistory history,
         CancellationToken cancellationToken)
     {
         string prompt = _promptLoader.Load("SuggestNextPrompt.yaml");
@@ -51,7 +51,7 @@ public class GameMaster
             function,
             arguments: new()
             {
-                {"chat_history", history }
+                {"chat_history", string.Join("\n", history.Select(c => c.Content)) }
             },
             cancellationToken);
         

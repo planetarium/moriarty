@@ -5,14 +5,14 @@
 @inject MarkdownService MarkdownService
 @inject GameBoardService GameBoardService
 @inject PromptLoader PromptLoader
+@inject SceneDirector SceneDirector;
+@inject IJSRuntime JS
 
 @code {
     [Parameter]
     public Guid CampaignId { get; set; }
 
-    private readonly List<ChatMessage> _messages = [];
-    
-    private record ChatMessage(string Sender, string Text);
+    private readonly ChatHistory _history = new();
 
     private string _userInput;
 
@@ -22,7 +22,9 @@
 
     private Character _victim;
 
-    private string _scene;
+    private string _sceneTitle;
+
+    private string _sceneDescription;
 
     private List<string> _suggestedPrompts = [];
     
@@ -37,7 +39,15 @@
     {
         GameBoardService.Bind(this);
         string rule = PromptLoader.Load("Rule.md");
-        _messages.Add(new("SYSTEM", rule));
+        _history.AddUserMessage(rule);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            await JS.InvokeVoidAsync("scrollToBottom", "chat-box");
+        }
     }
 
     private async Task SendMessage()
@@ -48,22 +58,21 @@
         }
         
         _waitingResponse = true;
-        _messages.Add(new("User", _userInput));
+        _history.AddUserMessage($"User: {_userInput}");
         _userInput = "";
-        ChatMessage response = await GenerateLLMResponse();
-        _messages.Add(response);
+        string response = await GenerateLLMResponse();
+        _history.AddUserMessage(response);
+        await SceneDirector.InvokeAsync(
+            CampaignId,
+            _history,
+            default);
         _waitingResponse = false;
         _suggestedPrompts.Clear();
     }
     
-    private async Task<ChatMessage> GenerateLLMResponse()
+    private Task<string> GenerateLLMResponse()
     {
-        return new(
-            "GM",
-            await GameMaster.ChatAsync(
-                CampaignId,
-                new ChatHistory(_messages.Select(m => new ChatMessageContent(AuthorRole.User, m.Text))), 
-                default));
+        return GameMaster.ChatAsync(CampaignId, _history, default);
     }
     
     private MarkupString RenderMarkdown(string markdown)
@@ -82,8 +91,7 @@
 
     private async Task SuggestNextPrompt()
     {
-        string history = string.Join("\n", _messages.Select(c => $"{c.Sender}: {c.Text}"));
-        _suggestedPrompts = await GameMaster.SuggestNextPromptAsync(history, default);
+        _suggestedPrompts = await GameMaster.SuggestNextPromptAsync(_history, default);
     }
 
     public void DisplayVictim(Character character)
@@ -99,9 +107,10 @@
         }
     }
 
-    public void ChangeScene(string description)
+    public void ChangeScene(string title, string description)
     {
-        _scene = description;
+        _sceneTitle = title;
+        _sceneDescription = description;
     }
 
     public void EndSession()
@@ -110,37 +119,48 @@
     }
 }
 <div class="container">
-    @if (_scene is not null)
-    {
-        <div class="row">
-            Scene: @_scene
-        </div>
-    }
     <div class="row">
-        <div class="col-lg-2">
+        <div class="col-lg-2 campaign-box">
             @if (_victim is not null)
             {
+                <h5>Victim</h5>
                 <CharacterCardView Character="_victim"/>
             }
+            @if (_sceneDescription is not null)
+            {
+                <h5>Scene</h5>
+                <div class="card">
+                    <p class="card-title">@_sceneTitle</p>
+                    <p class="card-body">
+                        @RenderMarkdown(_sceneDescription)
+                    </p>
+                </div>
+            }
         </div>
-        <div class="col-sm chat-container">
-            <div class="chat-box">
-                @foreach (ChatMessage message in _messages)
-                {
-                    <div class="chat-message">
-                        <strong>@message.Sender :</strong> @RenderMarkdown(message.Text)
-                    </div>
-                }
-            </div>
-            <div class="chat-input">
-                <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@(_waitingResponse || _ended) />
-                <button class="btn btn-primary" @onclick="SendMessage" disabled="@(_waitingResponse || _ended)">Submit</button>
-                <button class="btn btn-secondary" @onclick="SuggestNextPrompt" disabled=@_ended>Suggest</button>
+        <div class="col-sm">
+            <h5>Messages</h5>
+            <div class="chat-container">
+                <div class="chat-box" id="chat-box">
+                    @foreach (ChatMessageContent message in _history)
+                    {
+                        @if (message.Role == AuthorRole.User)
+                        {
+                            <div class="chat-message">
+                                @RenderMarkdown(message.ToString())
+                            </div>
+                        }
+                    }
+                </div>
+                <div class="chat-input">
+                    <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@(_waitingResponse || _ended)/>
+                    <button class="btn btn-primary" @onclick="SendMessage" disabled="@(_waitingResponse || _ended)">Submit</button>
+                    <button class="btn btn-secondary" @onclick="SuggestNextPrompt" disabled=@_ended>Suggest</button>
+                </div>
             </div>
             @if (_suggestedPrompts.Any())
             {
                 <hr/>
-                <div>
+                <div class="suggestions">
                     <h5>Suggestions</h5>
                     <ul>
                         @foreach (string suggestion in _suggestedPrompts)
@@ -151,16 +171,16 @@
                 </div>
             }
         </div>
-        @if (_suspects.Any())
-        {
-            <div class="col-lg-2 character-box">
+        <div class="col-lg-2 character-box">
+            @if (_suspects.Any())
+            {
                 <h5>Suspects</h5>
                 @foreach (Character suspect in _suspects)
                 {
                     <CharacterCardView Character=@suspect/>
                 }
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>
 <style>
@@ -198,11 +218,22 @@
         margin-right: 10px;
     }
     
-    .character-box {
+    .character-box, .campaign-box {
         height: 80vh;
         overflow: scroll;
     }
+
+    .suggestions li {
+        cursor: pointer;
+    }
 </style>
+
+<script>
+    function scrollToBottom(elementId) {
+        const element = document.getElementById(elementId);
+        element.scrollTop = element.scrollHeight;
+    }
+</script>
 
 @implements IGameBoard;
 @implements IDisposable;

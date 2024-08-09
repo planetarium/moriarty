@@ -4,10 +4,11 @@ namespace Moriarty.Web.Components.Pages;
 
 public interface IGameBoard
 {
-    void OnSuspectDisplayed(Character character);
+    void DisplaySuspect(Character character);
 
-    void OnVictimDisplayed(Character character);
+    void DisplayVictim(Character character);
 
-    void OnSceneChanged(string background);
-    void OnSessionEnded();
+    void ChangeScene(string title, string background);
+
+    void EndSession();
 }

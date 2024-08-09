@@ -39,11 +39,11 @@ public class GameBoardService
         }
     }
 
-    public void SetScene(string description)
+    public void SetScene(string title, string description)
     {
         foreach (IGameBoard board in _boards)
         {
-            board.ChangeScene(description);
+            board.ChangeScene(title, description);
         }
     }
 

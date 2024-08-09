@@ -22,6 +22,7 @@ builder.Services.AddSingleton<PromptLoader>();
 builder.Services.AddSingleton<MarkdownService>();
 builder.Services.AddSingleton<GameBoardService>();
 builder.Services.AddScoped<GameMaster>();
+builder.Services.AddScoped<SceneDirector>();
 builder.Services.AddScoped<CampaignBuilder>();
 builder.Services.AddScoped<HttpClient>();
 builder.Services.AddScoped<CampaignPlugin>();

@@ -21,10 +21,10 @@ public class GameBoardPlugin
     }
     
     [KernelFunction(name: "set_scene")]
-    [Description("Generate a prompt for DALL-e, to illustrate the scene where current conversation is taking")]
-    public void SetScene(string description)
+    [Description("Set a description for current scene.")]
+    public void SetScene(string title, string description)
     {
-        _gameBoardService.SetScene(description);
+        _gameBoardService.SetScene(title, description);
     }
 
     [KernelFunction("display_suspect_card")]
