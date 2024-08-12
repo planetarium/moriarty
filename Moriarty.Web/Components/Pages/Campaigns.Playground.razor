@@ -58,7 +58,7 @@
         }
         
         _waitingResponse = true;
-        _history.AddUserMessage($"User: {_userInput}");
+        _history.AddUserMessage($"Player: {_userInput}");
         _userInput = "";
         string response = await GenerateLLMResponse();
         _history.AddUserMessage(response);
