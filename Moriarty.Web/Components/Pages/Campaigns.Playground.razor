@@ -1,4 +1,7 @@
 @page "/campaigns/{CampaignId:guid}/playground"
+@using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using Microsoft.Extensions.Primitives
 @using Microsoft.SemanticKernel
 @using Microsoft.SemanticKernel.ChatCompletion
 @inject GameMaster GameMaster
@@ -7,6 +10,7 @@
 @inject PromptLoader PromptLoader
 @inject SceneDirector SceneDirector;
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 @code {
     [Parameter]
@@ -30,16 +34,50 @@
     
     private bool _ended;
 
+    private string _language;
+
     public void Dispose()
     {
         GameBoardService.Unbind(this);
     }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        Uri uri = new(Navigation.Uri);
+        Dictionary<string, StringValues> query = QueryHelpers.ParseQuery(uri.Query);
+        if (query.TryGetValue("lang", out StringValues lang))
+        {
+            _language = lang;
+        }
+
         GameBoardService.Bind(this);
         string rule = PromptLoader.Load("Rule.md");
         _history.AddUserMessage(rule);
+        if (!string.IsNullOrEmpty(_language))
+        {
+            _history.AddUserMessage($"In {_language}");
+        }
+
+        string response = await ChatWithGameMasterAsync();
+        _history.AddUserMessage(response);
+    }
+
+    private async Task<string> ChatWithGameMasterAsync()
+    {
+        _waitingResponse = true;
+        try
+        {
+            string response = await GameMaster.ChatAsync(
+                CampaignId,
+                _history,
+                default
+            );
+            return response;
+        }
+        finally
+        {
+            _waitingResponse = false;
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -57,22 +95,15 @@
             return;
         }
         
-        _waitingResponse = true;
         _history.AddUserMessage($"Player: {_userInput}");
         _userInput = "";
-        string response = await GenerateLLMResponse();
+        string response = await ChatWithGameMasterAsync();
         _history.AddUserMessage(response);
         await SceneDirector.InvokeAsync(
             CampaignId,
             _history,
             default);
-        _waitingResponse = false;
         _suggestedPrompts.Clear();
-    }
-    
-    private Task<string> GenerateLLMResponse()
-    {
-        return GameMaster.ChatAsync(CampaignId, _history, default);
     }
     
     private MarkupString RenderMarkdown(string markdown)
