@@ -16,7 +16,9 @@
     [Parameter]
     public Guid CampaignId { get; set; }
 
-    private readonly ChatHistory _history = new();
+    private bool InputBlocked => _waitingResponse || _ended;
+
+    private ChatHistory _history = new();
 
     private string _userInput;
 
@@ -125,6 +127,17 @@
         _suggestedPrompts = await GameMaster.SuggestNextPromptAsync(_history, default);
     }
 
+    private async Task RegeneratePrompt()
+    {
+        _history = new ChatHistory(_history.SkipLast(1));
+        string response = await ChatWithGameMasterAsync();
+        _history.AddUserMessage(response);
+        await SceneDirector.InvokeAsync(
+            CampaignId,
+            _history,
+            default);
+    }
+
     public void DisplayVictim(Character character)
     {
         _victim = character;
@@ -183,9 +196,12 @@
                     }
                 </div>
                 <div class="chat-input">
-                    <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@(_waitingResponse || _ended)/>
-                    <button class="btn btn-primary" @onclick="SendMessage" disabled="@(_waitingResponse || _ended)">Submit</button>
-                    <button class="btn btn-secondary" @onclick="SuggestNextPrompt" disabled=@_ended>Suggest</button>
+                    <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@InputBlocked/>
+                    <button class="btn btn-primary" @onclick="SendMessage" disabled=@InputBlocked>Submit</button>
+                    <button class="btn btn-secondary" @onclick="SuggestNextPrompt" disabled=@InputBlocked>Suggest</button>
+                    <button class="btn btn-secondary" @onclick="RegeneratePrompt" disabled=@InputBlocked>
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
             </div>
             @if (_suggestedPrompts.Any())

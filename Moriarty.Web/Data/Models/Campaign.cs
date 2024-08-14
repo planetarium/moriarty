@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Moriarty.Web.Data.Models;
 
@@ -36,6 +37,7 @@ public class Campaign
 
     public ICollection<Clue> Clues { get; set; } = [];
 
+    [JsonIgnore]
     public string LLMInstruction
     {
         get
