@@ -1,6 +1,5 @@
 @page "/campaigns/{CampaignId:guid}/playground"
 @using Microsoft.AspNetCore.WebUtilities
-@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @using Microsoft.Extensions.Primitives
 @using Microsoft.SemanticKernel
 @using Microsoft.SemanticKernel.ChatCompletion
@@ -55,10 +54,6 @@
         GameBoardService.Bind(this);
         string rule = PromptLoader.Load("Rule.md");
         _history.AddUserMessage(rule);
-        if (!string.IsNullOrEmpty(_language))
-        {
-            _history.AddUserMessage($"In {_language}");
-        }
 
         string response = await ChatWithGameMasterAsync();
         _history.AddUserMessage(response);
@@ -72,7 +67,8 @@
             string response = await GameMaster.ChatAsync(
                 CampaignId,
                 _history,
-                default
+                _language,
+                cancellationToken: default 
             );
             return response;
         }
@@ -96,16 +92,16 @@
         {
             return;
         }
-        
+
         _history.AddUserMessage($"Player: {_userInput}");
         _userInput = "";
+        _suggestedPrompts.Clear();
         string response = await ChatWithGameMasterAsync();
         _history.AddUserMessage(response);
         await SceneDirector.InvokeAsync(
             CampaignId,
             _history,
             default);
-        _suggestedPrompts.Clear();
     }
     
     private MarkupString RenderMarkdown(string markdown)
@@ -164,22 +160,14 @@
 }
 <div class="container">
     <div class="row">
-        <div class="col-lg-2 campaign-box">
-            @if (_victim is not null)
-            {
-                <h5>Victim</h5>
-                <CharacterCardView Character="_victim"/>
-            }
-            @if (_sceneDescription is not null)
-            {
-                <h5>Scene</h5>
-                <div class="card">
-                    <p class="card-title">@_sceneTitle</p>
-                    <p class="card-body">
-                        @RenderMarkdown(_sceneDescription)
-                    </p>
-                </div>
-            }
+        <div class="col-lg-2">
+            <h5>Victim</h5>
+            <div class="campaign-box">
+                @if (_victim is not null)
+                {
+                    <CharacterCardView Character="_victim"/>
+                }
+            </div>
         </div>
         <div class="col-sm">
             <h5>Messages</h5>
@@ -203,31 +191,45 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
-            </div>
-            @if (_suggestedPrompts.Any())
-            {
-                <hr/>
-                <div class="suggestions">
-                    <h5>Suggestions</h5>
-                    <ul>
-                        @foreach (string suggestion in _suggestedPrompts)
-                        {
-                            <li><a @onclick="() => { _userInput = suggestion; }">@suggestion</a></li>
-                        }
-                    </ul>
-                </div>
-            }
-        </div>
-        <div class="col-lg-2 character-box">
-            @if (_suspects.Any())
-            {
-                <h5>Suspects</h5>
-                @foreach (Character suspect in _suspects)
+                @if (_suggestedPrompts.Any())
                 {
-                    <CharacterCardView Character=@suspect/>
+                    <hr/>
+                    <div class="suggestions">
+                        <h5>Suggestions</h5>
+                        <ul>
+                            @foreach (string suggestion in _suggestedPrompts)
+                            {
+                                <li><a @onclick="() => { _userInput = suggestion; }">@suggestion</a></li>
+                            }
+                        </ul>
+                    </div>
                 }
-            }
+            </div>
         </div>
+        <div class="col-lg-2">
+            <h5>Suspects</h5>
+            <div class="character-box">
+                @if (_suspects.Any())
+                {
+                    @foreach (Character suspect in _suspects)
+                    {
+                        <CharacterCardView Character=@suspect/>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <h5>Scene</h5>
+        @if (_sceneDescription is not null)
+        {
+            <div class="card">
+                <p class="card-title">@_sceneTitle</p>
+                <p class="card-body">
+                    @RenderMarkdown(_sceneDescription)
+                </p>
+            </div>
+        }
     </div>
 </div>
 <style>
@@ -267,7 +269,14 @@
     
     .character-box, .campaign-box {
         height: 80vh;
-        overflow: scroll;
+        overflow-y: scroll;
+        border: 1px solid #ccc;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .character-box::-webkit-scrollbar, .campaign-box::-webkit-scrollbar {
+        display: none;
     }
 
     .suggestions li {

@@ -21,12 +21,14 @@ public class GameMaster
     public async Task<string> ChatAsync(
         Guid campaignId,
         ChatHistory history,
+        string language,
         CancellationToken cancellationToken
     )
     {
         string systemPrompt = _promptLoader.Load("GameMaster.txt");
         IChatCompletionService completion = _kernel.GetRequiredService<IChatCompletionService>();
-        systemPrompt += $"Current Campaign is {campaignId}";
+        systemPrompt += $"Current Campaign is {campaignId}\n";
+        systemPrompt += $"You should answer in {language}\n";
         var content = await completion.GetChatMessageContentsAsync(
             history,
             executionSettings: new OpenAIPromptExecutionSettings()
@@ -35,6 +37,7 @@ public class GameMaster
                 ChatSystemPrompt = systemPrompt,
                 Temperature = 0.7,
                 TopP = 0.7,
+                StopSequences = ["Player: "],
             },
             kernel: _kernel,
             cancellationToken: cancellationToken);
