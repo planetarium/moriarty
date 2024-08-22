@@ -18,7 +18,7 @@ public class GameMaster
         _logger = loggerFactory.CreateLogger<GameMaster>();
     }
     
-    public async Task<string> ChatAsync(
+    public IAsyncEnumerable<StreamingChatMessageContent> ChatAsync(
         Guid campaignId,
         ChatHistory history,
         string language,
@@ -29,7 +29,7 @@ public class GameMaster
         IChatCompletionService completion = _kernel.GetRequiredService<IChatCompletionService>();
         systemPrompt += $"Current Campaign is {campaignId}\n";
         systemPrompt += $"You should answer in {language}\n";
-        var content = await completion.GetChatMessageContentsAsync(
+        return completion.GetStreamingChatMessageContentsAsync(
             history,
             executionSettings: new OpenAIPromptExecutionSettings()
             {
@@ -41,7 +41,6 @@ public class GameMaster
             },
             kernel: _kernel,
             cancellationToken: cancellationToken);
-        return content[0].Content;
     }
     
     public async Task<List<string>> SuggestNextPromptAsync(

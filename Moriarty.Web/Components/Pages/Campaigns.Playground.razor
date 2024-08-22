@@ -10,6 +10,7 @@
 @inject SceneDirector SceneDirector;
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@attribute [StreamRendering]
 
 @code {
     [Parameter]
@@ -26,6 +27,8 @@
     private readonly List<Character> _suspects = [];
 
     private Character _victim;
+
+    private IEnumerable<string> _lastMessageChunks = [];
 
     private string _sceneTitle;
 
@@ -54,26 +57,32 @@
         GameBoardService.Bind(this);
         string rule = PromptLoader.Load("Rule.md");
         _history.AddUserMessage(rule);
-
-        string response = await ChatWithGameMasterAsync();
-        _history.AddUserMessage(response);
+        await ChatWithGameMasterAsync();
     }
 
-    private async Task<string> ChatWithGameMasterAsync()
+    private async Task ChatWithGameMasterAsync()
     {
         _waitingResponse = true;
         try
         {
-            string response = await GameMaster.ChatAsync(
+            IAsyncEnumerable<StreamingChatMessageContent> streamed = GameMaster.ChatAsync(
                 CampaignId,
                 _history,
                 _language,
                 cancellationToken: default 
             );
-            return response;
+
+            await foreach (StreamingChatMessageContent chunk in streamed)
+            {
+                _lastMessageChunks = _lastMessageChunks.Append(chunk.Content);
+                StateHasChanged();
+            }
+            _history.AddUserMessage(string.Join(string.Empty, _lastMessageChunks));
+            StateHasChanged();
         }
         finally
         {
+            _lastMessageChunks = [];
             _waitingResponse = false;
         }
     }
@@ -96,8 +105,8 @@
         _history.AddUserMessage($"Player: {_userInput}");
         _userInput = "";
         _suggestedPrompts.Clear();
-        string response = await ChatWithGameMasterAsync();
-        _history.AddUserMessage(response);
+
+        await ChatWithGameMasterAsync();
         await SceneDirector.InvokeAsync(
             CampaignId,
             _history,
@@ -126,8 +135,7 @@
     private async Task RegeneratePrompt()
     {
         _history = new ChatHistory(_history.SkipLast(1));
-        string response = await ChatWithGameMasterAsync();
-        _history.AddUserMessage(response);
+        await ChatWithGameMasterAsync();
         await SceneDirector.InvokeAsync(
             CampaignId,
             _history,
@@ -181,6 +189,16 @@
                                 @RenderMarkdown(message.ToString())
                             </div>
                         }
+                    }
+                    @if (_lastMessageChunks.Any())
+                    {
+                        <div class="chat-message">
+                            @foreach (string chunk in _lastMessageChunks)
+                            {
+                                @chunk
+                            }
+                            ...
+                        </div>
                     }
                 </div>
                 <div class="chat-input">
