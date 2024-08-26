@@ -10,6 +10,7 @@
 @inject SceneDirector SceneDirector;
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject ILogger<Campaigns_Playground> Logger
 @attribute [StreamRendering]
 
 @code {
@@ -77,6 +78,10 @@
                 _lastMessageChunks = _lastMessageChunks.Append(chunk.Content);
                 StateHasChanged();
             }
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Unhandled exception occurred on GameMaster.ChatAsync().");
         }
         finally
         {
