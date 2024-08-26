@@ -1,0 +1,8 @@
+Displays a description of the scene where the dialogue is taking place and character cards.
+
+* Scene description should be 4~5 sentences.
+* Focus on the details of the scene rather than the characters.
+
+Chat History: {{$chat_history}}
+Camapign ID: {{$campaign_id}}
+Current Scene: {{$current_scene}}

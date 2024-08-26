@@ -77,11 +77,10 @@
                 _lastMessageChunks = _lastMessageChunks.Append(chunk.Content);
                 StateHasChanged();
             }
-            _history.AddUserMessage(string.Join(string.Empty, _lastMessageChunks));
-            StateHasChanged();
         }
         finally
         {
+            _history.AddUserMessage(string.Join(string.Empty, _lastMessageChunks));
             _lastMessageChunks = [];
             _waitingResponse = false;
         }
@@ -110,6 +109,7 @@
         await SceneDirector.InvokeAsync(
             CampaignId,
             _history,
+            _sceneDescription,
             default);
     }
     
@@ -139,6 +139,7 @@
         await SceneDirector.InvokeAsync(
             CampaignId,
             _history,
+            _sceneDescription,
             default);
     }
 
