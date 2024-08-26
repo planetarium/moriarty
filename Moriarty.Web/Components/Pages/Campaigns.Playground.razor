@@ -17,13 +17,15 @@
     [Parameter]
     public Guid CampaignId { get; set; }
 
-    private bool InputBlocked => _waitingResponse || _ended;
+    private bool InputBlocked => _waitingResponse || _waitingSuggestions || _ended;
 
     private ChatHistory _history = new();
 
     private string _userInput;
 
     private bool _waitingResponse;
+
+    private bool _waitingSuggestions;
 
     private readonly List<Character> _suspects = [];
 
@@ -134,7 +136,9 @@
 
     private async Task SuggestNextPrompt()
     {
+        _waitingSuggestions = true;
         _suggestedPrompts = await GameMaster.SuggestNextPromptAsync(_history, default);
+        _waitingSuggestions = false;
     }
 
     private async Task RegeneratePrompt()
@@ -208,12 +212,21 @@
                     }
                 </div>
                 <div class="chat-input">
-                    <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled=@InputBlocked/>
-                    <button class="btn btn-primary" @onclick="SendMessage" disabled=@InputBlocked>Submit</button>
-                    <button class="btn btn-secondary" @onclick="SuggestNextPrompt" disabled=@InputBlocked>Suggest</button>
-                    <button class="btn btn-secondary" @onclick="RegeneratePrompt" disabled=@InputBlocked>
-                        <i class="fas fa-sync-alt"></i>
+                    <button class="btn btn-light" @onclick="SuggestNextPrompt" disabled="@InputBlocked">
+                        @if (_waitingSuggestions)
+                        {
+                            <i class="far fa-spinner fa-spin"></i>
+                        }
+                        else
+                        {
+                            <i class="far fa-lightbulb"></i>
+                        }
                     </button>
+                    <button class="btn btn-light" @onclick="RegeneratePrompt" disabled="@InputBlocked">
+                        <i class="far fa-sync-alt"></i>
+                    </button>
+                    <input class="form-control" type="text" @bind="_userInput" @bind:event="oninput" @onkeyup="HandleKeyUp" disabled="@InputBlocked"/>
+                    <button class="btn btn-primary" @onclick="SendMessage" disabled="@InputBlocked">Submit</button>
                 </div>
                 @if (_suggestedPrompts.Any())
                 {
@@ -288,6 +301,7 @@
         padding: 10px;
         border: 1px solid #ccc;
         border-radius: 4px;
+        margin-left: 10px;
         margin-right: 10px;
     }
     
