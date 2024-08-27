@@ -1,7 +1,25 @@
 ﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using System.Linq;
 
-<PageTitle>Home</PageTitle>
+@inject NavigationManager Navigation
+@inject AppDbContext AppDbContext
 
-<h1>Hello, world!</h1>
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // SQLite에서 무작위로 캠페인 하나를 선택하는 쿼리
+        var randomCampaign = await AppDbContext.Campaigns
+            .OrderBy(c => EF.Functions.Random())  // SQLite의 RANDOM() 함수 사용
+            .FirstOrDefaultAsync();
 
-Welcome to your new app.
+        if (randomCampaign is null)
+        {
+            Navigation.NavigateTo("/campaigns");
+        }
+        else
+        {
+            Navigation.NavigateTo($"/campaigns/{randomCampaign.Id}/playground");
+        }
+    }
+}
