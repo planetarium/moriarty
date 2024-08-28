@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.SemanticKernel;
 using Moriarty.Web.Components;
 using Moriarty.Web.Data;
@@ -16,7 +17,9 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddDbContext<AppDbContext>();
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<AppDbContext>(
+    options => options.UseSqlite(connectionString));
 
 builder.Services.AddSingleton<PromptLoader>();
 builder.Services.AddSingleton<MarkdownService>();
