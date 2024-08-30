@@ -21,4 +21,4 @@ COPY --from=build /publish .
 EXPOSE 5229
 
 # Set the entry point to run your application
-ENTRYPOINT ["Moriarty.Web"]
+ENTRYPOINT ["./Moriarty.Web"]
