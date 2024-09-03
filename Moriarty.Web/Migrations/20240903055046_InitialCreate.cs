@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Moriarty.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreations : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,11 +15,11 @@ namespace Moriarty.Web.Migrations
                 name: "Characters",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    Age = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProfilePicture = table.Column<byte[]>(type: "BLOB", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Age = table.Column<int>(type: "integer", nullable: false),
+                    ProfilePicture = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,13 +30,14 @@ namespace Moriarty.Web.Migrations
                 name: "Campaigns",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: false),
-                    Plot = table.Column<string>(type: "TEXT", nullable: true),
-                    VictimId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    OffenderId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Motive = table.Column<string>(type: "TEXT", nullable: true),
-                    Method = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Plot = table.Column<string>(type: "text", nullable: true),
+                    VictimId = table.Column<Guid>(type: "uuid", nullable: false),
+                    OffenderId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Motive = table.Column<string>(type: "text", nullable: true),
+                    Method = table.Column<string>(type: "text", nullable: true),
+                    OpenAIFileId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -59,8 +60,8 @@ namespace Moriarty.Web.Migrations
                 name: "CampaignSuspect",
                 columns: table => new
                 {
-                    CampaignId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    CharacterId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    CampaignId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -79,6 +80,26 @@ namespace Moriarty.Web.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Clue",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Description = table.Column<string>(type: "text", nullable: true),
+                    CampaignId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Clue", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Clue_Campaigns_CampaignId",
+                        column: x => x.CampaignId,
+                        principalTable: "Campaigns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Campaigns_OffenderId",
                 table: "Campaigns",
@@ -93,6 +114,11 @@ namespace Moriarty.Web.Migrations
                 name: "IX_CampaignSuspect_CharacterId",
                 table: "CampaignSuspect",
                 column: "CharacterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clue_CampaignId",
+                table: "Clue",
+                column: "CampaignId");
         }
 
         /// <inheritdoc />
@@ -100,6 +126,9 @@ namespace Moriarty.Web.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CampaignSuspect");
+
+            migrationBuilder.DropTable(
+                name: "Clue");
 
             migrationBuilder.DropTable(
                 name: "Campaigns");

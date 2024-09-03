@@ -15,6 +15,17 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Character>(e =>
+        {
+            if (Database.IsSqlite())
+            {
+                e.Property(e => e.ProfilePicture).HasColumnType("BLOB");
+            }
+            else if (Database.IsNpgsql())
+            {
+                e.Property(e => e.ProfilePicture).HasColumnType("bytea");
+            }
+        });
         modelBuilder.Entity<Campaign>()
             .HasMany(c => c.Suspects)
             .WithMany(c => c.SuspectedInCampaigns)
