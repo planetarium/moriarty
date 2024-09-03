@@ -17,9 +17,20 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(
-    options => options.UseSqlite(connectionString));
+string dbProvider = builder.Configuration["DatabaseProvider"];
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    string connectionString = builder.Configuration.GetConnectionString("AppDbContext");
+    switch (dbProvider)
+    {
+        case "SQLite":
+            options.UseSqlite(connectionString);
+            break;
+        case "Postgres":
+            options.UseNpgsql(connectionString);
+            break;
+    }
+});
 
 builder.Services.AddSingleton<PromptLoader>();
 builder.Services.AddSingleton<MarkdownService>();
