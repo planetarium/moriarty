@@ -17,6 +17,8 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHttpContextAccessor();
+
 string dbProvider = builder.Configuration["DatabaseProvider"];
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
