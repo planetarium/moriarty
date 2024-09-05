@@ -27,12 +27,27 @@
         <label for="num_of_suspects">Number of suspects</label>
         <input id="num_of_suspects" type="number" class="form-control" min="2" max="10" @bind-value="_suspects" />
     </div>
-
-    <button type="button" class="btn btn-primary" @onclick="Scaffold" disabled=@_loading>Next</button>
+    <div class="form-group">
+        <label for="keywords">Keywords</label>
+        <input id="keywords" type="text" class="form-control" placeholder="e.g., poison, locked room" @bind-value="_keywords" />
+    </div>
+    <div class="form-group">
+        <button type="button" class="btn btn-primary form-control" @onclick="Scaffold" disabled=@_waitingDraft>
+            @if (_waitingDraft)
+            {
+                <i class="fa-solid fa-spinner fa-spin"></i>
+            }
+            else
+            {
+                @:Next
+            }
+        </button>
+    </div>
 </form>
 
 @if (_draft != null)
 {
+    <hr />
     <h2>Review Draft</h2>
     <EditForm Model="_draft" OnSubmit="HandleSubmit">
         <h3>Overview</h3>
@@ -42,7 +57,7 @@
         </div>
         <div>
             <label for="plot">Plot:</label>
-            <InputTextArea id="plot" @bind-Value="_draft.Plot" class="form-control" />
+            <InputTextArea id="plot" @bind-Value="_draft.Plot" class="form-control" rows="8" />
         </div>
         <hr />
 
@@ -73,42 +88,62 @@
             <label for="method">Method:</label>
             <InputTextArea id="method" @bind-Value="_draft.Method" class="form-control" />
         </div>
+        <hr />
         
         <h3>Clues</h3>
-        <button type="button" class="form-control btn" @onclick="AddClue">Add Clue</button>
         <div class="row">
             @foreach (var clue in _draft.Clues)
             {
                 <ClueCardForm Clue="@clue" OnClueDeleted="DeleteClue" />
             }
+            <div class="card col-sm-4">
+                <div class="card-body">
+                    <button type="button" class="btn btn-secondary form-control" @onclick="AddClue">
+                        @if (_waitingClue)
+                        {
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        }
+                        else
+                        {
+                            @:Add Clue
+                        }
+                    </button>
+                </div>
+            </div>
         </div>
+        <hr />
 
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary form-control">Submit</button>
     </EditForm>
 }
 
 @code {
     Campaign _draft;
 
-    bool _loading;
+    bool _waitingDraft;
 
     string _language;
 
     string _background;
 
-    int _suspects;
+    int _suspects = 3;
+
+    string _keywords;
+    
+    bool _waitingClue;
 
     private async Task Scaffold()
     {
-        _loading = true;
+        _waitingDraft = true;
         _draft = await CampaignBuilder.GenerateDraftAsnyc(
             _background,
             _suspects,
+            _keywords,
             _language,
             default
         );
         UpdateOffender(_draft.Offender.Name);
-        _loading = false;
+        _waitingDraft = false;
     }
 
     public void UpdateOffender(string name)
@@ -131,7 +166,9 @@
 
     private async Task AddClue()
     {
+        _waitingClue = true;
         Clue clue = await CampaignBuilder.CreateClueAsync(_draft, default);
         _draft.Clues.Add(clue);
+        _waitingClue = false;
     }
 }

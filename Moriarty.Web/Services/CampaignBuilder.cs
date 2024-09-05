@@ -24,6 +24,7 @@ public class CampaignBuilder
     public async Task<Campaign> GenerateDraftAsnyc(
         string background,
         int suspects,
+        string keywords,
         string language,
         CancellationToken cancellationToken
     ) {
@@ -36,6 +37,7 @@ public class CampaignBuilder
                 { "background", background },
                 { "language", language },
                 { "suspects", suspects },
+                { "keywords", keywords },
             },
             cancellationToken: cancellationToken
         );

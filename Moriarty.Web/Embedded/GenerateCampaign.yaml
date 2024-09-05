@@ -4,30 +4,31 @@ template: |
   
   * Background: {{$background}}
   * Suspects: {{$suspects}} person
+  * Keywords: {{$keywords}}
 
   Here is required JSON keys for campaign
 
   * `Title`
-  * `Plot`
+  * `Plot` (7~8 sentences)
   * `Suspects`
   * `Victim`
   * `Offender`
-  * `Motive`
-  * `Method`
+  * `Motive` (3~4 sentences)
+  * `Method` (2~3 sentences)
   * `Clues`
 
   Also, `Suspects`, `Victim` and `Offender` share same scheme and has below keys.
 
   * `Name`
   * `Age`
-  * `Description`
+  * `Description` (5~6 sentences)
 
   `Offender` field is simple copy of one of `Suspects`.
   
   `Clues` is an array of `Clue` and `Clue` has below keys. `Clues` is consists of 3~5 `Clue`s.
   
   * `Name`
-  * `Description`
+  * `Description` (2~3 sentences)
 
 template_format: semantic-kernel
 description: A function that generates a setting for mystery game.
@@ -43,6 +44,10 @@ input_variables:
     description: Number of suspects in the settings.
     is_required: false
     default: 5
+  - name: keywords
+    description: The keywords for the generated campaign.
+    is_required: false
+    default: ""
 output_variable:
   description: The generated campaign setting.
 execution_settings:

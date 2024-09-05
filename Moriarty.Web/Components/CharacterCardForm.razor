@@ -7,38 +7,34 @@
         <img src="data:image/jpeg;base64,@Convert.ToBase64String(Character.ProfilePicture)" class="card-img-top"/>
     }
     <div class="card-body">
-        @if (_refreshingPortrait)
-        {
-            <div class="spinner card-img-top"></div>
-        }
-        else
-        {
-            <button type="button" @onclick="async () => { await CreatePortrait(); }" class="form-control btn">Refresh</button>
-        }
+        <button type="button" @onclick="async () => { await CreatePortrait(); }" class="form-control btn" disabled="@_refreshingPortrait">
+            @if (_refreshingPortrait)
+            {
+                <i class="fa-solid fa-spinner fa-spin"></i>
+            }
+            else
+            {
+                @:Refresh
+            }
+        </button>
         <label for=@($"character-{Character.Id}-name")>Name:</label>
         <InputText id=@($"character-{Character.Id}-name") @bind-Value="Character.Name" class="form-control"/>
         <label for=@($"character-{Character.Id}-age")>Age:</label>
         <InputNumber id=@($"character-{Character.Id}-age") @bind-Value="Character.Age" class="form-control"/>
         <label for=@($"character-{Character.Id}-description")>Description:</label>
-        <InputTextArea id=@($"character-{Character.Id}-description") @bind-Value="Character.Description" class="form-control" disabled="@_enhancingDescription"/>
-        <button type="button" class="form-control btn" @onclick="EnhanceCharacterDescription" disabled="@_enhancingDescription">Enhance Description</button>
+        <InputTextArea id=@($"character-{Character.Id}-description") @bind-Value="Character.Description" class="form-control" disabled="@_enhancingDescription" rows="10"/>
+        <button type="button" class="form-control btn" @onclick="EnhanceCharacterDescription" disabled="@_enhancingDescription">
+            @if (_enhancingDescription)
+            {
+                <i class="fa-solid fa-spinner fa-spin"></i>
+            }
+            else
+            {
+                @:Enhance Description
+            }
+        </button>
     </div>
 </div>
-<style>
-    @@keyframes spinner {
-        to {transform: rotate(360deg);}
-    }
-
-    .spinner {
-        width: 50px;
-        height: 50px;
-        border: 3px solid rgba(0, 0, 0, 0.1);
-        border-radius: 50%;
-        border-top-color: #000;
-        animation: spinner 0.6s linear infinite;
-        margin: auto;
-    }
-</style>
 
 @code {
     [Parameter]
