@@ -128,4 +128,22 @@ public class CampaignBuilder
             cancellationToken: cancellationToken
         );
     }
+
+    public async Task<Campaign> GenerateDraftByNovelAsnyc(string author, string title, string language, CancellationToken cancellationToken)
+    {
+        string prompt = _promptLoader.Load("ExtractFromNovel.yaml");
+        KernelFunction function = _kernel.CreateFunctionFromPromptYaml(prompt);
+        string asJson = await _kernel.InvokeAsync<string>(
+            function,
+            arguments: new()
+            {
+                { "author", author },
+                { "title", title },
+                { "language", language },
+            },
+            cancellationToken: cancellationToken
+        );
+
+        return JsonSerializer.Deserialize<Campaign>(asJson);
+    }
 }

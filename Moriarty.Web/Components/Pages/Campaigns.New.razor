@@ -6,6 +6,14 @@
 <h1>Create New Campaign</h1>
 
 <h2>Scaffold</h2>
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link @(_scaffoldMode == ScaffoldMode.Manual ? "active" : "")" @onclick="@(() => { _scaffoldMode = ScaffoldMode.Manual;})">Manual</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(_scaffoldMode == ScaffoldMode.Extract ? "active" : "")" @onclick="@(() => { _scaffoldMode = ScaffoldMode.Extract; })">Extract from novels</a>
+    </li>
+</ul>
 <form>
     <div class="form-group">
         <label for="language">Language</label>
@@ -15,31 +23,43 @@
             <option>日本語</option>
         </select>
     </div>
-    <div class="form-group">
-        <label for="background">Background</label>
-        <select class="form-control" id="background" name="background" @bind="_background">
-            <option>Morden</option>
-            <option>Cyberfunk</option>
-            <option>Fantasy</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="num_of_suspects">Number of suspects</label>
-        <input id="num_of_suspects" type="number" class="form-control" min="2" max="10" @bind-value="_suspects" />
-    </div>
-    <div class="form-group">
-        <label for="keywords">Keywords</label>
-        <input id="keywords" type="text" class="form-control" placeholder="e.g., poison, locked room" @bind-value="_keywords" />
-    </div>
+    @if (_scaffoldMode == ScaffoldMode.Manual)
+    {
+        <div class="form-group">
+            <label for="background">Background</label>
+            <select class="form-control" id="background" name="background" @bind="_background">
+                <option>Morden</option>
+                <option>Cyberfunk</option>
+                <option>Fantasy</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="num_of_suspects">Number of suspects</label>
+            <input id="num_of_suspects" type="number" class="form-control" min="2" max="10" @bind-value="_suspects"/>
+        </div>
+        <div class="form-group">
+            <label for="keywords">Keywords</label>
+            <input id="keywords" type="text" class="form-control" placeholder="e.g., poison, locked room" @bind-value="_keywords"/>
+        </div>
+    }
+    else
+    {
+        <div class="form-group">
+            <label for="novelTitle">Novel Title</label>
+            <input id="novelTitle" class="form-control" @bind-value="_novelTitle" />
+            <label for="novelAuthor">Author</label>
+            <input id="novelAuthor" class="form-control" @bind-value="_novelAuthor" />
+        </div>
+    }
     <div class="form-group">
         <button type="button" class="btn btn-primary form-control" @onclick="Scaffold" disabled=@_waitingDraft>
             @if (_waitingDraft)
             {
-                <i class="fa-solid fa-spinner fa-spin"></i>
+            <i class="fa-solid fa-spinner fa-spin"></i>
             }
             else
             {
-                @:Next
+            @:Next
             }
         </button>
     </div>
@@ -131,17 +151,35 @@
     string _keywords;
     
     bool _waitingClue;
+    
+    private ScaffoldMode _scaffoldMode = ScaffoldMode.Manual;
+
+    private string _novelTitle;
+
+    private string _novelAuthor;
 
     private async Task Scaffold()
     {
         _waitingDraft = true;
-        _draft = await CampaignBuilder.GenerateDraftAsnyc(
-            _background,
-            _suspects,
-            _keywords,
-            _language,
-            default
-        );
+        if (_scaffoldMode == ScaffoldMode.Manual)
+        {
+            _draft = await CampaignBuilder.GenerateDraftAsnyc(
+                _background,
+                _suspects,
+                _keywords,
+                _language,
+                default
+            );   
+        }
+        else
+        {
+            _draft = await CampaignBuilder.GenerateDraftByNovelAsnyc(
+                _novelAuthor,
+                _novelTitle,
+                _language,
+                cancellationToken: default
+            );
+        }
         UpdateOffender(_draft.Offender.Name);
         _waitingDraft = false;
     }
@@ -170,5 +208,11 @@
         Clue clue = await CampaignBuilder.CreateClueAsync(_draft, default);
         _draft.Clues.Add(clue);
         _waitingClue = false;
+    }
+    
+    public enum ScaffoldMode
+    {
+        Manual,
+        Extract
     }
 }

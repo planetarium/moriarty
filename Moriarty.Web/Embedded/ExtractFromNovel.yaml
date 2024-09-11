@@ -1,0 +1,51 @@
+name: ExtractFromNovel
+template: |
+  Extract a new campaign setting from the existing detective novel, in {{$language}}.
+  
+  Title: {{$title}}
+  Author: {{$author}}
+
+  Here is required JSON keys for campaign
+
+  * `Title`
+  * `Plot` (7~8 sentences)
+  * `Suspects`
+  * `Victim`
+  * `Offender`
+  * `Motive` (3~4 sentences)
+  * `Method` (2~3 sentences)
+  * `Clues`
+
+  Also, `Suspects`, `Victim` and `Offender` share same scheme and has below keys.
+
+  * `Name`
+  * `Age`
+  * `Description` (5~6 sentences)
+
+  `Offender` field is simple copy of one of `Suspects`.
+  
+  `Clues` is an array of `Clue` and `Clue` has below keys. `Clues` is consists of 3~5 `Clue`s.
+  
+  * `Name`
+  * `Description` (2~3 sentences)
+
+template_format: semantic-kernel
+description: A function that generates a campaign setting from existing novel.
+input_variables:
+  - name: language
+    description: The language for the generated setting.
+    is_required: true
+  - name: title
+    description: The title of existing novel.
+    is_required: true
+  - name: author
+    description: The author of exsting novel.
+    is_required: false
+    default: ""
+output_variable:
+  description: The generated campaign setting.
+execution_settings:
+  service1:
+    model_id: gpt-4o
+    temperature: 0.7
+    response_format: json_object
