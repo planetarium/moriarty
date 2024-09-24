@@ -25,8 +25,8 @@ Content creation and game playing are supported LLM, thorugh [Semantic Kernel][]
 
 1. Set OpenAI API key to `dotnet user-secrets` as below.
 ```bash
-$ dotnet user-secrets init --project Moriarty.Web/
-$ dotnet user-secrets set "OpenAI:ApiKey" "<OPENAI_API_KEY>"
+$ dotnet user-secrets init --project Moriarty.Web
+$ dotnet user-secrets set --project Moriarty.Web "OpenAI:ApiKey" "<OPENAI_API_KEY>"
 ```
 2. (Optional) Change path of SQLite database file.
 ```bash
